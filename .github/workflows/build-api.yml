@@ -48,5 +48,5 @@ jobs:
         if: ${{ github.ref == 'refs/heads/main' }}
         run: |
           docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
-          ./mvnw -B -ntp spring-boot:build-image -Dspring-boot.build-image.imageName=${{ secrets.DOCKER_USERNAME }}/weaver-api:${{ github.sha }}
-          docker push ${{ secrets.DOCKER_USERNAME }}/weaver-api:${{ github.sha }}
+          ./mvnw -B -ntp spring-boot:build-image -Dspring-boot.build-image.imageName=$IMAGE:${{ github.sha }}
+          docker push $IMAGE:${{ github.sha }}
