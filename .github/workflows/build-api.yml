@@ -47,7 +47,7 @@ jobs:
 
       # OPTIONAL: build & push Docker image only on main when secrets are present
       - name: Build & push Docker image
-        if: github.ref == 'refs/heads/main' && secrets.DOCKER_USERNAME && secrets.DOCKER_PASSWORD
+        if: ${{ github.ref == 'refs/heads/main' && secrets.DOCKER_USERNAME && secrets.DOCKER_PASSWORD }}
         env:
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
           DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
