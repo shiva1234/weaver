@@ -23,7 +23,6 @@ jobs:
   build-weaver-api:
     runs-on: ubuntu-latest
 
-    # all `run:` steps execute in the module folder
     defaults:
       run:
         working-directory: weaver-api
@@ -35,23 +34,19 @@ jobs:
       - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
-          distribution: temurin   # or corretto
+          distribution: temurin
           java-version: '21'
           cache: maven
 
-      - name: Make mvnw executable (Linux runners)
+      - name: Make mvnw executable
         run: chmod +x mvnw
 
       - name: Build & test
         run: ./mvnw -B -ntp verify
 
-      # OPTIONAL: build & push Docker image only on main when secrets are present
       - name: Build & push Docker image
-        if: ${{ github.ref == 'refs/heads/main' && secrets.DOCKER_USERNAME && secrets.DOCKER_PASSWORD }}
-        env:
-          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+        if: ${{ github.ref == 'refs/heads/main' }}
         run: |
-          echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-          ./mvnw -B -ntp spring-boot:build-image -Dspring-boot.build-image.imageName=${DOCKER_USERNAME}/weaver-api:${{ github.sha }}
-          docker push ${DOCKER_USERNAME}/weaver-api:${{ github.sha }}
+          docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+          ./mvnw -B -ntp spring-boot:build-image -Dspring-boot.build-image.imageName=${{ secrets.DOCKER_USERNAME }}/weaver-api:${{ github.sha }}
+          docker push ${{ secrets.DOCKER_USERNAME }}/weaver-api:${{ github.sha }}
