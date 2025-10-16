@@ -125,9 +125,9 @@
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 				<configuration>
-                    <image>
-                        <name>run/weaver-api</name>
-                    </image>
+<!--                    <image>-->
+<!--                        <name>run/weaver-api</name>-->
+<!--                    </image>-->
 					<excludes>
 						<exclude>
 							<groupId>org.projectlombok</groupId>
