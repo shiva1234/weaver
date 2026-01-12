@@ -4,6 +4,8 @@ package com.weaver.weaver_api.model;
 import jakarta.persistence.*;
 import jakarta.persistence.Index;
 import lombok.Setter;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -52,8 +54,8 @@ public class Product extends Audited {
     @Column(name="is_active", nullable = false)
     private Boolean active = Boolean.TRUE;
 
-    @Convert(converter = ImagesJsonConverter.class)
-    @Column(name="images", columnDefinition = "jsonb", nullable = false)
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name="images", nullable = false)
     private List<String> images; // e.g. ["s3://bucket/products/product_id=1/uuid.jpg", ...]
 
     @Column(name="primary_image", length = 1024)

@@ -2,6 +2,7 @@
 package com.weaver.weaver_api.model;
 
 import jakarta.persistence.*;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "customer",
@@ -32,6 +33,12 @@ public class Customer extends Audited {
     @Column(name="phone", length = 40)
     private String phone;
 
+    @Column(name="reset_token", length = 255)
+    private String resetToken;
+
+    @Column(name="reset_token_expiry")
+    private LocalDateTime resetTokenExpiry;
+
     // getters/setters
     public Long getId() { return id; }
     public String getEmail() { return email; }
@@ -40,6 +47,8 @@ public class Customer extends Audited {
     public String getFirstName() { return firstName; }
     public String getLastName() { return lastName; }
     public String getPhone() { return phone; }
+    public String getResetToken() { return resetToken; }
+    public LocalDateTime getResetTokenExpiry() { return resetTokenExpiry; }
 
     public void setEmail(String email) { this.email = email; }
     public void setGuest(boolean guest) { this.guest = guest; }
@@ -47,4 +56,6 @@ public class Customer extends Audited {
     public void setFirstName(String firstName) { this.firstName = firstName; }
     public void setLastName(String lastName) { this.lastName = lastName; }
     public void setPhone(String phone) { this.phone = phone; }
+    public void setResetToken(String resetToken) { this.resetToken = resetToken; }
+    public void setResetTokenExpiry(LocalDateTime resetTokenExpiry) { this.resetTokenExpiry = resetTokenExpiry; }
 }

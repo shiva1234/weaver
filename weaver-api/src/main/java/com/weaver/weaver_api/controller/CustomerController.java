@@ -6,6 +6,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping("/api/customers")
 @RequiredArgsConstructor
@@ -26,12 +28,23 @@ public class CustomerController {
 
     @PutMapping("/{id}")
     public Customer update(@PathVariable Long id, @Valid @RequestBody Customer body) {
-        return customerService.update(body);
+        return customerService.update(id, body);
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable Long id) {
         customerService.delete(id);
+    }
+
+    @PostMapping("/forgot-password")
+    public Map<String, String> forgotPassword(@RequestParam String email) {
+        String token = customerService.forgotPassword(email);
+        return Map.of("message", "Reset token generated", "token", token);
+    }
+
+    @PostMapping("/reset-password")
+    public void resetPassword(@RequestParam String token, @RequestParam String newPassword) {
+        customerService.resetPassword(token, newPassword);
     }
 }

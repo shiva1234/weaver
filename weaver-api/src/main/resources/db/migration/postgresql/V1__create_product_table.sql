@@ -51,6 +51,8 @@ CREATE TABLE customer (
   last_name    VARCHAR(100),
   phone        VARCHAR(30),
   is_guest     BOOLEAN NOT NULL DEFAULT FALSE,
+  reset_token VARCHAR(255),
+  reset_token_expiry TIMESTAMP,
   created_at   TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at   TIMESTAMPTZ NOT NULL DEFAULT now()
 );
