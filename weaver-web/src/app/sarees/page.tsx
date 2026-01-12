@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import SortBar from "@/components/SortBar";
 import FilterChips from "@/components/FilterChips";
@@ -11,6 +11,16 @@ import { getProducts, Product } from "@/lib/api";
 
 type Dir = "asc" | "desc";
 type SortKey = "price" | "name";
+
+type PageDto<T> = {
+  items: T[];        // or 'content' if that’s what your API returns
+  page: number;
+  pageSize: number;
+  totalItems: number;
+  totalPages: number;
+  hasNext: boolean;
+  hasPrev: boolean;
+};
 
 export default function SareesPage() {
   const [page, setPage] = useState(1);
@@ -25,36 +35,45 @@ export default function SareesPage() {
   const [fabric, setFabric] = useState<string[]>([]);
 
   const [loading, setLoading] = useState(false);
-  const [data, setData] = useState<{
-    content: Product[]; page: number; totalPages: number; totalElements: number;
-  } | null>(null);
+  const [data, setData] = useState<PageDto<Product> | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchData = async () => {
-    setLoading(true); setError(null);
-    try {
-      const res: any = await getProducts({ page, size, sort, dir, query, minPrice, maxPrice, color, fabric });
+  // extract complex expressions for deps
+  const colorKey  = useMemo(() => color.join(","), [color]);
+  const fabricKey = useMemo(() => fabric.join(","), [fabric]);
 
-      // normalize backend keys -> UI shape
-      const items: Product[] = res.items ?? res.content ?? [];
-      const pageNo: number = res.page ?? 1;
-      const pageSize: number = res.pageSize ?? size;
-      const totalItems: number = res.totalItems ?? res.totalElements ?? 0;
+  const fetchData = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await getProducts({
+        page, size, sort, dir, query, minPrice, maxPrice,
+        // if backend supports these:
+        // color, fabric
+      });
+
+      // map to our PageDto<Product>
+      const items = (res.items ?? res.content) as Product[];
+      const pageNum = res.page ?? res.currentPage ?? page;
 
       setData({
-        content: items,
-        page: pageNo,
-        totalPages: res.totalPages ?? Math.max(1, Math.ceil(totalItems / pageSize)),
-        totalElements: totalItems,
+        items,
+        page: pageNum,
+        pageSize: res.pageSize ?? size,
+        totalItems: res.totalItems ?? res.totalElements ?? items.length,
+        totalPages: res.totalPages ?? 1,
+        hasNext: res.hasNext ?? (pageNum < (res.totalPages ?? 1)),
+        hasPrev: res.hasPrev ?? (pageNum > 1),
       });
-    } catch (e: any) {
-      setError(e.message || "Failed to load");
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : "Failed to load";
+      setError(msg);
     } finally {
       setLoading(false);
     }
-  };
+  }, [page, size, sort, dir, query, minPrice, maxPrice, colorKey, fabricKey]);
 
-  useEffect(()=>{ fetchData(); /* eslint-disable-next-line */ }, [page, size, sort, dir, query, minPrice, maxPrice, color.join(","), fabric.join(",")]);
+  useEffect(() => { fetchData(); }, [fetchData]);
 
   const activeChips = useMemo(() => {
     const chips: {label:string; key:string; value:string}[] = [];
@@ -82,11 +101,7 @@ export default function SareesPage() {
 
   return (
     <main className="max-w-7xl mx-auto px-4 py-6">
-      <Breadcrumbs items={[
-        { label: "Home", href: "/" },
-        { label: "Sarees" }
-      ]} />
-
+      <Breadcrumbs items={[{ label: "Home", href: "/" }, { label: "Sarees" }]} />
       <div className="flex gap-6">
         <LeftFilters
           selected={{ query, minPrice, maxPrice, color, fabric }}
@@ -99,20 +114,15 @@ export default function SareesPage() {
             setPage(1);
           }}
         />
-
         <section className="flex-1">
           <SortBar
             sort={sort}
             dir={dir}
-            total={data?.totalElements || 0}
+            total={data?.totalItems ?? 0}
             onChange={(s, d)=>{ setSort(s); setDir(d); setPage(1); }}
           />
 
-          <FilterChips
-            active={activeChips}
-            onRemove={handleRemoveChip}
-            onClear={handleClear}
-          />
+          <FilterChips active={activeChips} onRemove={handleRemoveChip} onClear={handleClear} />
 
           {loading && <div className="py-20 text-center text-gray-600">Loading…</div>}
           {error && <div className="py-20 text-center text-red-600">{error}</div>}
@@ -120,9 +130,8 @@ export default function SareesPage() {
           {!loading && !error && (
             <>
               <div className="grid sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
-                {data?.content.map((p)=> <ProductCard key={p.id} p={p} />)}
+                {data?.items.map((p)=> <ProductCard key={p.id} p={p} />)}
               </div>
-
               <Pagination
                 page={data?.page || 1}
                 totalPages={data?.totalPages || 1}

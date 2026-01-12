@@ -1,3 +1,4 @@
+// com/weaver/weaver_api/service/ProductService.java
 package com.weaver.weaver_api.service;
 
 import com.weaver.weaver_api.model.Product;
@@ -11,9 +12,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import static org.springframework.data.jpa.domain.Specification.allOf;
-
-import java.util.List;
+import java.math.BigDecimal;
 
 @Service
 @RequiredArgsConstructor
@@ -21,37 +20,52 @@ import java.util.List;
 public class ProductService {
     private final ProductRepository repository;
 
-    public Page<Product> searchProducts(
+    public Page<Product> search(
             int page, int size, String sort, String dir,
-            String query, Integer minPrice, Integer maxPrice) {
-        int pageIndex = Math.max(0, page - 1 );
+            String query, BigDecimal minPrice, BigDecimal maxPrice,
+            Long categoryId, Boolean active, String sku
+    ) {
+        int pageIndex = Math.max(0, page - 1);
+        String sortProp = (sort == null || sort.isBlank()) ? "sellPrice" : sort;
         Sort.Direction direction = "asc".equalsIgnoreCase(dir) ? Sort.Direction.ASC : Sort.Direction.DESC;
-        Pageable pageable = PageRequest.of(pageIndex, size, Sort.by(direction, (sort == null || sort.isBlank()) ? "price" : sort));
-        Specification<Product> spec = Specification
-                .allOf(ProductSpecs.nameContains(query))
-                .and(ProductSpecs.minPrice(minPrice))
-                .and(ProductSpecs.maxPrice(maxPrice));
+        Pageable pageable = PageRequest.of(pageIndex, size, Sort.by(direction, sortProp));
+
+        Specification<Product> spec = Specification.allOf(
+                ProductSpecs.nameContains(query),
+                ProductSpecs.minSellPrice(minPrice),
+                ProductSpecs.maxSellPrice(maxPrice),
+                ProductSpecs.categoryIdEq(categoryId),
+                ProductSpecs.activeEq(active),
+                ProductSpecs.skuEquals(sku)
+        );
         return repository.findAll(spec, pageable);
     }
 
-
-    public Product getProduct(Long id) {
-        return repository.findById(id).orElseThrow(() ->
-                new NotFoundException("Product id %d not found".formatted(id)));
+    public Product get(Long id) {
+        return repository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Product id %d not found".formatted(id)));
     }
 
     @Transactional
-    public Product create(ProductRequest req) {
+    public Product create(ProductRequest r) {
+        // Optional: enforce unique sku at app layer (DB constraint already exists)
+        if (repository.existsBySku(r.sku())) {
+            throw new IllegalArgumentException("SKU already exists: " + r.sku());
+        }
         Product p = new Product();
-        apply(p, req);
+        apply(p, r);
         return repository.save(p);
     }
 
     @Transactional
-    public Product update(Long id, ProductRequest req) {
-        Product p = repository.findById(id).orElseThrow(() ->
-                new NotFoundException("Product id %d not found".formatted(id)));
-        apply(p, req);
+    public Product update(Long id, ProductRequest r) {
+        Product p = repository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Product id %d not found".formatted(id)));
+        // Optional: if sku changed, validate uniqueness
+        if (!p.getSku().equals(r.sku()) && repository.existsBySku(r.sku())) {
+            throw new IllegalArgumentException("SKU already exists: " + r.sku());
+        }
+        apply(p, r);
         return repository.save(p);
     }
 
@@ -65,10 +79,14 @@ public class ProductService {
 
     private static void apply(Product p, ProductRequest r) {
         p.setName(r.name());
-        p.setImage(r.image());
-        p.setQuantity(r.quantity());
-        p.setPrice(r.price());
-        p.setWeight(r.weight());
         p.setDescription(r.description());
+        p.setCategoryId(r.categoryId());
+        p.setVendorPrice(r.vendorPrice());
+        p.setSellPrice(r.sellPrice());
+        p.setStockQty(r.stockQty());
+        p.setSku(r.sku());
+        p.setActive(r.active());
+        p.setImages(r.images());
+        p.setPrimaryImage(r.primaryImage());
     }
 }

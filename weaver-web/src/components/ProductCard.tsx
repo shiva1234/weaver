@@ -1,4 +1,5 @@
 import { Product } from "@/lib/api";
+import Image from "next/image";
 
 export default function ProductCard({ p }: { p: Product }) {
   return (
@@ -8,11 +9,12 @@ export default function ProductCard({ p }: { p: Product }) {
           {p.badge}
         </span>
       )}
-      <img
+      <Image
         src={p.image || "/placeholder.png"}
         alt={p.name}
-        className="h-64 w-full object-cover group-hover:scale-[1.02] transition"
-        loading="lazy"
+        width={400}
+        height={520}
+        className="w-full h-auto object-cover rounded"
       />
       <div className="p-4">
         <h3 className="font-medium line-clamp-1">{p.name}</h3>

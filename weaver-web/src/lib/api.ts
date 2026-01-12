@@ -1,6 +1,8 @@
 // src/lib/api.ts
 const API_BASE =
-process.env.NEXT_PUBLIC_API_BASE?.replace(/\/+$/, '') ?? 'http://localhost:18080';
+(typeof window === 'undefined'
+? process.env.SERVER_SIDE_API_BASE_URL
+: process.env.NEXT_PUBLIC_API_BASE_URL) ?? 'http://localhost:18080';
 
 /** Domain types */
 export type Product = {
@@ -94,11 +96,18 @@ function toSearch(params: Record<string, any>): string {
 
 /** GET paged products (with optional filters) */
 export async function getProducts(params: ProductQuery = {}): Promise<PageResponse<Product>> {
-  const url = `${API_BASE}/api/products?${toSearch(params)}`;
-  const res = await fetch(url, { cache: 'no-store' /*, credentials: 'include'*/ });
-  if (!res.ok) throw new Error(`GET /products ${res.status}: ${await res.text()}`);
-  const raw: ApiPage<Product> = await res.json();
-  return normalizePage(raw);
+  const url = `${API_BASE}/api/products?${search.toString()}`;
+
+  try {
+    const res = await fetch(url, { cache: 'no-store' });
+    if (!res.ok) {
+      throw new Error(`API ${res.status}: ${await res.text()}`);
+    }
+    return res.json();
+  } catch (e: unknown) {
+    const msg = e instanceof Error ? e.message : 'Unknown error';
+    throw new Error(msg);
+  }
 }
 
 /** GET one */

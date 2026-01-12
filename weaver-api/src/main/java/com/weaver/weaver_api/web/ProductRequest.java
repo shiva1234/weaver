@@ -1,14 +1,19 @@
+// com/weaver/weaver_api/web/ProductRequest.java
 package com.weaver.weaver_api.web;
 
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
+import java.math.BigDecimal;
+import java.util.List;
 
 public record ProductRequest(
-        @NotBlank @Size(max = 255) String name,
-        @Size(max = 1024) String image,
-        @Min(0) int quantity,
-        @Min(0) int price,
-        @Min(0) int weight,
-        @Size(max = 2000) String description
+        @NotBlank @Size(max = 200) String name,
+        @Size(max = 10_000) String description,
+        @NotNull Long categoryId,
+        @NotNull @PositiveOrZero BigDecimal vendorPrice,
+        @NotNull @PositiveOrZero BigDecimal sellPrice,
+        @NotNull @PositiveOrZero Integer stockQty,
+        @NotBlank @Size(max = 80) String sku,
+        @NotNull Boolean active,
+        @NotNull List<@NotBlank String> images,
+        @Size(max = 1024) String primaryImage
 ) {}

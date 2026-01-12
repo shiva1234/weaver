@@ -15,3 +15,14 @@ services:
     restart: always
     depends_on:
       - weaver-db
+
+#  weaver-web:
+#    container_name: weaver-web
+#    build:
+#      context: weaver-web
+#      dockerfile: Dockerfile
+#    ports:
+#      - "13000:3000"
+#    environment:
+#      SERVER_SIDE_API_BASE_URL: http://localhost:18080
+#      CLIENT_SIDE_API_BASE_URL: http://localhost:18080

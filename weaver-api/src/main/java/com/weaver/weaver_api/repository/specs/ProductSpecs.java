@@ -1,33 +1,42 @@
-// com.weaver.weaver_api.repository.spec.ProductSpecs
+// com/weaver/weaver_api/repository/specs/ProductSpecs.java
 package com.weaver.weaver_api.repository.specs;
 
 import com.weaver.weaver_api.model.Product;
 import org.springframework.data.jpa.domain.Specification;
 
-public final class ProductSpecs {
+import java.math.BigDecimal;
 
+public final class ProductSpecs {
     private ProductSpecs() {}
 
     public static Specification<Product> nameContains(String q) {
-        return (root, cq, cb) ->
-                (q == null || q.isBlank())
-                        ? cb.conjunction()
-                        : cb.like(cb.lower(root.get("name")), "%" + q.trim().toLowerCase() + "%");
+        if (q == null || q.isBlank()) return null;
+        final String like = "%" + q.trim().toLowerCase() + "%";
+        return (root, cq, cb) -> cb.like(cb.lower(root.get("name")), like);
     }
 
-    public static Specification<Product> minPrice(Integer min) {
-        return (root, cq, cb) ->
-                (min == null) ? cb.conjunction() : cb.greaterThanOrEqualTo(root.get("price"), min);
+    public static Specification<Product> activeEq(Boolean active) {
+        if (active == null) return null;
+        return (root, cq, cb) -> cb.equal(root.get("active"), active);
     }
 
-    public static Specification<Product> maxPrice(Integer max) {
-        return (root, cq, cb) ->
-                (max == null) ? cb.conjunction() : cb.lessThanOrEqualTo(root.get("price"), max);
+    public static Specification<Product> categoryIdEq(Long categoryId) {
+        if (categoryId == null) return null;
+        return (root, cq, cb) -> cb.equal(root.get("categoryId"), categoryId);
     }
 
-    // If later you add categoryId on Product:
-    // public static Specification<Product> categoryId(Long id) {
-    //     return (root, cq, cb) -> (id == null) ? cb.conjunction() :
-    //             cb.equal(root.get("category").get("id"), id);
-    // }
+    public static Specification<Product> minSellPrice(BigDecimal min) {
+        if (min == null) return null;
+        return (root, cq, cb) -> cb.greaterThanOrEqualTo(root.get("sellPrice"), min);
+    }
+
+    public static Specification<Product> maxSellPrice(BigDecimal max) {
+        if (max == null) return null;
+        return (root, cq, cb) -> cb.lessThanOrEqualTo(root.get("sellPrice"), max);
+    }
+
+    public static Specification<Product> skuEquals(String sku) {
+        if (sku == null || sku.isBlank()) return null;
+        return (root, cq, cb) -> cb.equal(root.get("sku"), sku);
+    }
 }
