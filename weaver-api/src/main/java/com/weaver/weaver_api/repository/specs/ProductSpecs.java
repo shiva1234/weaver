@@ -5,6 +5,7 @@ import com.weaver.weaver_api.model.Product;
 import org.springframework.data.jpa.domain.Specification;
 
 import java.math.BigDecimal;
+import java.util.UUID;
 
 public final class ProductSpecs {
     private ProductSpecs() {}
@@ -20,7 +21,7 @@ public final class ProductSpecs {
         return (root, cq, cb) -> cb.equal(root.get("active"), active);
     }
 
-    public static Specification<Product> categoryIdEq(Long categoryId) {
+    public static Specification<Product> categoryIdEq(UUID categoryId) {
         if (categoryId == null) return null;
         return (root, cq, cb) -> cb.equal(root.get("categoryId"), categoryId);
     }

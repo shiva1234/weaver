@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/customers")
@@ -16,7 +17,7 @@ public class CustomerController {
     private final com.weaver.weaver_api.service.CustomerService customerService;
 
     @GetMapping("/{id}")
-    public Customer get(@PathVariable Long id) {
+    public Customer get(@PathVariable UUID id) {
         return customerService.getOne(id);
     }
 
@@ -27,13 +28,13 @@ public class CustomerController {
     }
 
     @PutMapping("/{id}")
-    public Customer update(@PathVariable Long id, @Valid @RequestBody Customer body) {
+    public Customer update(@PathVariable UUID id, @Valid @RequestBody Customer body) {
         return customerService.update(id, body);
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(@PathVariable Long id) {
+    public void delete(@PathVariable UUID id) {
         customerService.delete(id);
     }
 

@@ -2,14 +2,15 @@
 package com.weaver.weaver_api.model;
 
 import jakarta.persistence.*;
+import java.util.UUID;
 
 @Entity
 @Table(name = "address")
 public class Address extends Audited {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
 
     // tie to a valid customer
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
@@ -35,8 +36,8 @@ public class Address extends Audited {
     private String country;
 
     // getters/setters...
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    public UUID getId() { return id; }
+    public void setId(UUID id) { this.id = id; }
     public Customer getCustomer() { return customer; }
     public void setCustomer(Customer customer) { this.customer = customer; }
     public String getAddressLine1() { return addressLine1; }

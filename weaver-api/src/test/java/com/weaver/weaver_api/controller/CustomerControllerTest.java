@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import java.util.Map;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -24,7 +25,7 @@ class CustomerControllerTest {
     void shouldCreateAndRetrieveCustomer() {
         // Given
         Customer newCustomer = new Customer();
-        newCustomer.setEmail("test.user.integration@example.com"); // Unique email
+        newCustomer.setEmail("test.user." + UUID.randomUUID() + "@example.com");
         newCustomer.setPassword("securePassword123");
         newCustomer.setFirstName("Test");
         newCustomer.setLastName("User");
@@ -42,10 +43,9 @@ class CustomerControllerTest {
         Customer created = createResponse.getBody();
         assertThat(created).isNotNull();
         assertThat(created.getId()).isNotNull();
-        assertThat(created.getEmail()).isEqualTo("test.user.integration@example.com");
-        // Password should be hashed, so it shouldn't match the plain text
+        assertThat(created.getEmail()).isEqualTo(newCustomer.getEmail());
         assertThat(created.getPassword()).isNotEqualTo("securePassword123");
-        assertThat(created.getPassword()).startsWith("$2a$"); // BCrypt prefix
+        assertThat(created.getPassword()).startsWith("$2a$");
 
         // When Get
         ResponseEntity<Customer> getResponse = restTemplate.getForEntity(
@@ -56,14 +56,14 @@ class CustomerControllerTest {
         // Then Get
         assertThat(getResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(getResponse.getBody()).isNotNull();
-        assertThat(getResponse.getBody().getEmail()).isEqualTo("test.user.integration@example.com");
+        assertThat(getResponse.getBody().getEmail()).isEqualTo(newCustomer.getEmail());
     }
 
     @Test
     void shouldUpdateCustomer() {
         // Given
         Customer newCustomer = new Customer();
-        newCustomer.setEmail("update.user.integration@example.com"); // Unique email
+        newCustomer.setEmail("update.user." + UUID.randomUUID() + "@example.com");
         newCustomer.setPassword("password");
         newCustomer.setFirstName("Original");
         
@@ -72,15 +72,14 @@ class CustomerControllerTest {
                 newCustomer,
                 Customer.class
         );
-        Long id = createResponse.getBody().getId();
+        UUID id = createResponse.getBody().getId();
 
         // When Update
         Customer updatePayload = new Customer();
         updatePayload.setFirstName("Updated");
         updatePayload.setLastName("Name");
-        updatePayload.setEmail("update.user.integration@example.com"); // Keep email same
+        updatePayload.setEmail(newCustomer.getEmail());
         updatePayload.setGuest(false);
-        // Not sending password, so it should remain unchanged
 
         ResponseEntity<Customer> updateResponse = restTemplate.exchange(
                 "/api/customers/" + id,
@@ -94,7 +93,6 @@ class CustomerControllerTest {
         assertThat(updateResponse.getBody().getFirstName()).isEqualTo("Updated");
         assertThat(updateResponse.getBody().getLastName()).isEqualTo("Name");
         
-        // Verify password didn't change (hash should be same as original creation)
         String originalHash = createResponse.getBody().getPassword();
         String currentHash = updateResponse.getBody().getPassword();
         assertThat(currentHash).isEqualTo(originalHash);
@@ -104,7 +102,7 @@ class CustomerControllerTest {
     void shouldDeleteCustomer() {
         // Given
         Customer newCustomer = new Customer();
-        newCustomer.setEmail("delete.user.integration@example.com");
+        newCustomer.setEmail("delete.user." + UUID.randomUUID() + "@example.com");
         newCustomer.setPassword("password");
         
         ResponseEntity<Customer> createResponse = restTemplate.postForEntity(
@@ -112,7 +110,7 @@ class CustomerControllerTest {
                 newCustomer,
                 Customer.class
         );
-        Long id = createResponse.getBody().getId();
+        UUID id = createResponse.getBody().getId();
 
         // When Delete
         restTemplate.delete("/api/customers/" + id);
@@ -129,14 +127,15 @@ class CustomerControllerTest {
     void shouldResetPassword() {
         // 1. Create Customer
         Customer customer = new Customer();
-        customer.setEmail("reset.password@example.com");
+        String email = "reset.password." + UUID.randomUUID() + "@example.com";
+        customer.setEmail(email);
         customer.setPassword("oldPassword");
         customer.setGuest(false);
         restTemplate.postForEntity("/api/customers", customer, Customer.class);
 
         // 2. Request Forgot Password
         ResponseEntity<Map> forgotResponse = restTemplate.postForEntity(
-                "/api/customers/forgot-password?email=reset.password@example.com",
+                "/api/customers/forgot-password?email=" + email,
                 null,
                 Map.class
         );
@@ -151,9 +150,5 @@ class CustomerControllerTest {
                 Void.class
         );
         assertThat(resetResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
-
-        // 4. Verify Login (or check hash changed) - here we just check if we can get the user and the hash is different
-        // Note: We can't easily check the hash directly via API unless we expose it, but we can assume success if no error.
-        // Ideally, we would have a login endpoint to verify.
     }
 }

@@ -20,7 +20,7 @@ public class CustomerService {
     private final PasswordEncoder passwordEncoder;
 
     @Transactional(Transactional.TxType.SUPPORTS)
-    public Customer getOne(Long id) {
+    public Customer getOne(UUID id) {
         return customers.findById(id).orElseThrow(() -> new NotFoundException("Customer id " + id + " not found"));
     }
 
@@ -37,26 +37,21 @@ public class CustomerService {
                     Customer c = new Customer();
                     c.setEmail(email);
                     c.setGuest(true);
-                    // Guests might not have a password initially, or we set a dummy one if DB requires it
-                    // Assuming DB allows null or we handle it. The entity says nullable=false, so we need a placeholder or handle it.
-                    // For now, let's set a random unguessable password for guests if needed, or rely on them setting it later.
                     c.setPassword(passwordEncoder.encode(java.util.UUID.randomUUID().toString()));
                     return customers.save(c);
                 });
     }
 
-    public Customer update(Long id, Customer c) {
+    public Customer update(UUID id, Customer c) {
         Customer existing = customers.findById(id)
                 .orElseThrow(() -> new NotFoundException("Customer id " + id + " not found"));
         
-        // Update fields
         existing.setFirstName(c.getFirstName());
         existing.setLastName(c.getLastName());
         existing.setPhone(c.getPhone());
         existing.setEmail(c.getEmail());
         existing.setGuest(c.isGuest());
         
-        // Only update password if provided and not empty
         if (c.getPassword() != null && !c.getPassword().isBlank()) {
             existing.setPassword(passwordEncoder.encode(c.getPassword()));
         }
@@ -64,7 +59,7 @@ public class CustomerService {
         return customers.save(existing);
     }
 
-    public void delete(Long id) {
+    public void delete(UUID id) {
         if (!customers.existsById(id)) throw new NotFoundException("Customer id " + id + " not found");
         customers.deleteById(id);
     }
@@ -75,10 +70,9 @@ public class CustomerService {
 
         String token = UUID.randomUUID().toString();
         customer.setResetToken(token);
-        customer.setResetTokenExpiry(LocalDateTime.now().plusHours(1)); // Token valid for 1 hour
+        customer.setResetTokenExpiry(LocalDateTime.now().plusHours(1));
         customers.save(customer);
 
-        // In a real application, send this token via email
         return token;
     }
 

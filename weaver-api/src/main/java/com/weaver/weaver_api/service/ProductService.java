@@ -13,6 +13,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -23,7 +25,7 @@ public class ProductService {
     public Page<Product> search(
             int page, int size, String sort, String dir,
             String query, BigDecimal minPrice, BigDecimal maxPrice,
-            Long categoryId, Boolean active, String sku
+            UUID categoryId, Boolean active, String sku
     ) {
         int pageIndex = Math.max(0, page - 1);
         String sortProp = (sort == null || sort.isBlank()) ? "sellPrice" : sort;
@@ -41,26 +43,30 @@ public class ProductService {
         return repository.findAll(spec, pageable);
     }
 
-    public Product get(Long id) {
+    public Product get(UUID id) {
         return repository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Product id %d not found".formatted(id)));
+                .orElseThrow(() -> new NotFoundException("Product id %s not found".formatted(id)));
     }
 
     @Transactional
-    public Product create(ProductRequest r) {
+    public Product create(ProductRequest r, List<String> imageUrls) {
         // Optional: enforce unique sku at app layer (DB constraint already exists)
         if (repository.existsBySku(r.sku())) {
             throw new IllegalArgumentException("SKU already exists: " + r.sku());
         }
         Product p = new Product();
         apply(p, r);
+        p.setImages(imageUrls);
+        if (!imageUrls.isEmpty() && p.getPrimaryImage() == null) {
+            p.setPrimaryImage(imageUrls.get(0));
+        }
         return repository.save(p);
     }
 
     @Transactional
-    public Product update(Long id, ProductRequest r) {
+    public Product update(UUID id, ProductRequest r) {
         Product p = repository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Product id %d not found".formatted(id)));
+                .orElseThrow(() -> new NotFoundException("Product id %s not found".formatted(id)));
         // Optional: if sku changed, validate uniqueness
         if (!p.getSku().equals(r.sku()) && repository.existsBySku(r.sku())) {
             throw new IllegalArgumentException("SKU already exists: " + r.sku());
@@ -70,9 +76,9 @@ public class ProductService {
     }
 
     @Transactional
-    public void delete(Long id) {
+    public void delete(UUID id) {
         if (!repository.existsById(id)) {
-            throw new NotFoundException("Product id %d not found".formatted(id));
+            throw new NotFoundException("Product id %s not found".formatted(id));
         }
         repository.deleteById(id);
     }

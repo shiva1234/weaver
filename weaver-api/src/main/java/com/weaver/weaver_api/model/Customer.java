@@ -3,6 +3,7 @@ package com.weaver.weaver_api.model;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Entity
 @Table(name = "customer",
@@ -12,8 +13,8 @@ import java.time.LocalDateTime;
 public class Customer extends Audited {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
 
     @Column(name="email", nullable = false, length = 255)
     private String email;
@@ -40,7 +41,7 @@ public class Customer extends Audited {
     private LocalDateTime resetTokenExpiry;
 
     // getters/setters
-    public Long getId() { return id; }
+    public UUID getId() { return id; }
     public String getEmail() { return email; }
     public boolean isGuest() { return guest; }
     public String getPassword() { return password; }

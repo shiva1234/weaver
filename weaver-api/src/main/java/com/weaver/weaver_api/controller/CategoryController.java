@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/categories")
@@ -21,7 +22,7 @@ public class CategoryController {
     }
 
     @GetMapping("/{id}")
-    public Category get(@PathVariable Long id) {
+    public Category get(@PathVariable UUID id) {
         return categoryService.getOne(id);
     }
 
@@ -32,13 +33,13 @@ public class CategoryController {
     }
 
     @PutMapping("/{id}")
-    public Category update(@PathVariable Long id, @Valid @RequestBody Category body) {
-        return categoryService.update(id, body); // <- pass id, don’t set on body
+    public Category update(@PathVariable UUID id, @Valid @RequestBody Category body) {
+        return categoryService.update(id, body);
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(@PathVariable Long id) {
+    public void delete(@PathVariable UUID id) {
         categoryService.delete(id);
     }
 }

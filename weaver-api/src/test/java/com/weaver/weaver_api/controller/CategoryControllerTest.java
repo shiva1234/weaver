@@ -12,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import java.util.List;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -25,7 +26,7 @@ class CategoryControllerTest {
     void shouldManageCategories() {
         // 1. Create
         Category cat = new Category();
-        cat.setName("Test Category");
+        cat.setName("Test Category " + UUID.randomUUID());
         
         ResponseEntity<Category> createResponse = restTemplate.postForEntity(
                 "/api/categories",
@@ -44,11 +45,11 @@ class CategoryControllerTest {
                 new ParameterizedTypeReference<>() {}
         );
         assertThat(listResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(listResponse.getBody()).extracting(Category::getName).contains("Test Category");
+        assertThat(listResponse.getBody()).extracting(Category::getName).contains(cat.getName());
 
         // 3. Update
         Category updatePayload = new Category();
-        updatePayload.setName("Updated Category");
+        updatePayload.setName("Updated Category " + UUID.randomUUID());
         
         ResponseEntity<Category> updateResponse = restTemplate.exchange(
                 "/api/categories/" + created.getId(),
@@ -57,7 +58,7 @@ class CategoryControllerTest {
                 Category.class
         );
         assertThat(updateResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(updateResponse.getBody().getName()).isEqualTo("Updated Category");
+        assertThat(updateResponse.getBody().getName()).isEqualTo(updatePayload.getName());
 
         // 4. Delete
         restTemplate.delete("/api/categories/" + created.getId());

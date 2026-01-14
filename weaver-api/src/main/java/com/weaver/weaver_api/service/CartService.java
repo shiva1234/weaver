@@ -27,7 +27,7 @@ public class CartService {
     private final CustomerRepository customers;
 
     /** Ensure a single active cart for a customer (create if missing). */
-    public Cart ensureCustomerCart(Long customerId) {
+    public Cart ensureCustomerCart(UUID customerId) {
         if (!customers.existsById(customerId)) {
             throw new NotFoundException("Customer id " + customerId + " not found");
         }
@@ -41,31 +41,19 @@ public class CartService {
 
     /** Ensure a guest cart exists for the given email (or create a new one with a token). */
     public Cart ensureGuestCart(String email, CustomerService customerService) {
-        // In this logic, we might create a guest customer record or just rely on the token.
-        // The controller passes 'email', implying we might want to link it to a guest customer record.
-        // However, typically guest carts are identified by a token.
-        // If the requirement is to use email to find a guest customer, we can do that.
-        
-        // Let's assume we create a guest customer if needed, but the cart is primarily linked via token for anonymous users
-        // OR if the user provides an email, maybe we link it to that guest customer ID.
-        
-        // Based on the controller usage: ensureGuest(@RequestParam String email)
-        // It seems we want to create a cart for a guest user identified by email.
-        
         var customer = customerService.getOrCreateGuestByEmail(email);
         
-        // Check if this guest customer already has a cart
         return carts.findByCustomerId(customer.getId()).orElseGet(() -> {
             Cart c = new Cart();
             c.setCustomerId(customer.getId());
-            c.setGuestToken(UUID.randomUUID().toString()); // Generate a token for client-side tracking
+            c.setGuestToken(UUID.randomUUID().toString());
             c.setTotalPrice(BigDecimal.ZERO);
             return carts.save(c);
         });
     }
 
     @Transactional(Transactional.TxType.SUPPORTS)
-    public Cart findByCustomer(Long customerId) {
+    public Cart findByCustomer(UUID customerId) {
         return carts.findByCustomerId(customerId)
                 .orElseThrow(() -> new NotFoundException("No active cart for customer " + customerId));
     }
@@ -77,26 +65,22 @@ public class CartService {
     }
 
     /** Merge a guest cart into a logged-in customer's cart. */
-    public Cart attachGuestCartToCustomer(String guestToken, Long customerId) {
+    public Cart attachGuestCartToCustomer(String guestToken, UUID customerId) {
         Cart guestCart = carts.findByGuestToken(guestToken).orElse(null);
         Cart customerCart = ensureCustomerCart(customerId);
 
         if (guestCart != null && !guestCart.getId().equals(customerCart.getId())) {
-            // Move items from guest cart to customer cart
             List<CartItem> guestItems = cartItems.findByCartId(guestCart.getId());
             for (CartItem gi : guestItems) {
-                // Check if item exists in customer cart
                 CartItem existing = cartItems.findFirstByCartIdAndProductId(customerCart.getId(), gi.getProductId()).orElse(null);
                 if (existing != null) {
                     existing.setQuantity(existing.getQuantity() + gi.getQuantity());
                     cartItems.save(existing);
                 } else {
-                    // Reassign to new cart
                     gi.setCartId(customerCart.getId());
                     cartItems.save(gi);
                 }
             }
-            // Delete the old guest cart
             carts.delete(guestCart);
             
             recalcCartTotal(customerCart);
@@ -106,7 +90,7 @@ public class CartService {
     }
 
     @Transactional(Transactional.TxType.SUPPORTS)
-    public List<CartItem> listItems(Long cartId) {
+    public List<CartItem> listItems(UUID cartId) {
         if (!carts.existsById(cartId)) {
             throw new NotFoundException("Cart " + cartId + " not found");
         }
@@ -114,7 +98,7 @@ public class CartService {
     }
 
     /** Add an item (or increase qty if already present). */
-    public CartItem addItem(Long cartId, Long productId, int qty) {
+    public CartItem addItem(UUID cartId, UUID productId, int qty) {
         if (qty < 1) throw new IllegalArgumentException("qty >= 1 required");
 
         Cart cart = carts.findById(cartId)
@@ -129,7 +113,6 @@ public class CartService {
             item.setCartId(cart.getId());
             item.setProductId(product.getId());
             item.setProductName(product.getName());
-            // Expect Product.sellPrice to be BigDecimal
             item.setPrice(product.getSellPrice());
             item.setQuantity(qty);
         } else {
@@ -142,7 +125,7 @@ public class CartService {
     }
 
     /** Update quantity of a specific cart item. */
-    public CartItem updateQuantity(Long cartId, Long itemId, int qty) {
+    public CartItem updateQuantity(UUID cartId, UUID itemId, int qty) {
         if (qty < 1) throw new IllegalArgumentException("qty >= 1 required");
 
         Cart cart = carts.findById(cartId)
@@ -163,7 +146,7 @@ public class CartService {
     }
 
     /** Remove one item from the cart. */
-    public void removeItem(Long cartId, Long itemId) {
+    public void removeItem(UUID cartId, UUID itemId) {
         Cart cart = carts.findById(cartId)
                 .orElseThrow(() -> new NotFoundException("Cart not found"));
 
@@ -179,7 +162,7 @@ public class CartService {
     }
 
     /** Clear the cart entirely. */
-    public void clear(Long cartId) {
+    public void clear(UUID cartId) {
         Cart cart = carts.findById(cartId)
                 .orElseThrow(() -> new NotFoundException("Cart not found"));
 

@@ -9,17 +9,17 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Repository
-public interface CartItemRepository extends JpaRepository<CartItem, Long> {
+public interface CartItemRepository extends JpaRepository<CartItem, UUID> {
 
     // All items in a cart
-    List<CartItem> findByCartId(Long cartId);
+    List<CartItem> findByCartId(UUID cartId);
 
     // A specific product in a cart (helpful for upsert-like behavior)
-    boolean existsByCartIdAndProductId(Long cartId, Long productId);
+    boolean existsByCartIdAndProductId(UUID cartId, UUID productId);
 
     // If you often fetch one item for increment/decrement logic:
-    Optional<CartItem> findFirstByCartIdAndProductId(Long cartId, Long productId);
+    Optional<CartItem> findFirstByCartIdAndProductId(UUID cartId, UUID productId);
 
     // Clean up items of a cart (useful before checkout)
-    void deleteByCartId(Long cartId);
+    void deleteByCartId(UUID cartId);
 }

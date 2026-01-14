@@ -1,6 +1,7 @@
 package com.weaver.weaver_api.model;
 
 import java.math.BigDecimal;
+import java.util.UUID;
 import jakarta.persistence.*;
 
 @Entity
@@ -18,11 +19,11 @@ import jakarta.persistence.*;
 public class Cart extends Audited {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
 
     @Column(name="customer_id")
-    private Long customerId;  // nullable for guests
+    private UUID customerId;  // nullable for guests
 
     @Column(name="guest_token")
     private String guestToken; // nullable for customers
@@ -31,12 +32,12 @@ public class Cart extends Audited {
     private BigDecimal totalPrice = BigDecimal.ZERO;
 
     // getters/setters
-    public Long getId() { return id; }
-    public Long getCustomerId() { return customerId; }
+    public UUID getId() { return id; }
+    public UUID getCustomerId() { return customerId; }
     public String getGuestToken() { return guestToken; }
     public BigDecimal getTotalPrice() { return totalPrice; }
 
-    public void setCustomerId(Long customerId) { this.customerId = customerId; }
+    public void setCustomerId(UUID customerId) { this.customerId = customerId; }
     public void setGuestToken(String guestToken) { this.guestToken = guestToken; }
     public void setTotalPrice(BigDecimal totalPrice) { this.totalPrice = totalPrice; }
 }

@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/carts")
@@ -27,14 +28,14 @@ public class CartController {
 
     // Ensure customer cart
     @PostMapping("/ensure/{customerId}")
-    public Cart ensureCustomer(@PathVariable Long customerId) {
+    public Cart ensureCustomer(@PathVariable UUID customerId) {
         return cartService.ensureCustomerCart(customerId);
     }
 
     // Merge guest into customer on login
     @PostMapping("/attach-guest")
     public Cart attachGuest(@RequestParam String guestToken,
-                            @RequestParam Long customerId) {
+                            @RequestParam UUID customerId) {
         return cartService.attachGuestCartToCustomer(guestToken, customerId);
     }
 
@@ -45,40 +46,40 @@ public class CartController {
     }
 
     @GetMapping("/by-customer/{customerId}")
-    public Cart getByCustomer(@PathVariable Long customerId) {
+    public Cart getByCustomer(@PathVariable UUID customerId) {
         return cartService.findByCustomer(customerId);
     }
 
     // Items
     @GetMapping("/{cartId}/items")
-    public List<CartItem> listItems(@PathVariable Long cartId) {
+    public List<CartItem> listItems(@PathVariable UUID cartId) {
         return cartService.listItems(cartId);
     }
 
     @PostMapping("/{cartId}/items")
     @ResponseStatus(HttpStatus.CREATED)
-    public CartItem add(@PathVariable Long cartId,
-                        @RequestParam Long productId,
+    public CartItem add(@PathVariable UUID cartId,
+                        @RequestParam UUID productId,
                         @RequestParam int quantity) {
         return cartService.addItem(cartId, productId, quantity);
     }
 
     @PutMapping("/{cartId}/items/{itemId}")
-    public CartItem updateQty(@PathVariable Long cartId,
-                              @PathVariable Long itemId,
+    public CartItem updateQty(@PathVariable UUID cartId,
+                              @PathVariable UUID itemId,
                               @RequestParam int quantity) {
         return cartService.updateQuantity(cartId, itemId, quantity);
     }
 
     @DeleteMapping("/{cartId}/items/{itemId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void remove(@PathVariable Long cartId, @PathVariable Long itemId) {
+    public void remove(@PathVariable UUID cartId, @PathVariable UUID itemId) {
         cartService.removeItem(cartId, itemId);
     }
 
     @DeleteMapping("/{cartId}/items")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void clear(@PathVariable Long cartId) {
+    public void clear(@PathVariable UUID cartId) {
         cartService.clear(cartId);
     }
 }

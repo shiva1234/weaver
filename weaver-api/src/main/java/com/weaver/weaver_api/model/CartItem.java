@@ -2,6 +2,7 @@ package com.weaver.weaver_api.model;
 
 import jakarta.persistence.*;
 import java.math.BigDecimal;
+import java.util.UUID;
 
 @Entity
 @Table(name = "cart_items",
@@ -12,14 +13,14 @@ import java.math.BigDecimal;
 public class CartItem extends Audited {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
 
     @Column(name="cart_id", nullable = false)
-    private Long cartId;
+    private UUID cartId;
 
     @Column(name="product_id", nullable = false)
-    private Long productId;
+    private UUID productId;
 
     @Column(name="product_name", nullable = false, length = 200)
     private String productName;
@@ -31,16 +32,16 @@ public class CartItem extends Audited {
     private Integer quantity;
 
     // ----- Getters -----
-    public Long getId() { return id; }
-    public Long getCartId() { return cartId; }
-    public Long getProductId() { return productId; }
+    public UUID getId() { return id; }
+    public UUID getCartId() { return cartId; }
+    public UUID getProductId() { return productId; }
     public String getProductName() { return productName; }
     public BigDecimal getPrice() { return price; }
     public Integer getQuantity() { return quantity; }
 
     // ----- Setters -----
-    public void setCartId(Long cartId) { this.cartId = cartId; }
-    public void setProductId(Long productId) { this.productId = productId; }
+    public void setCartId(UUID cartId) { this.cartId = cartId; }
+    public void setProductId(UUID productId) { this.productId = productId; }
     public void setProductName(String productName) { this.productName = productName; }
     public void setPrice(BigDecimal price) { this.price = price; }
     public void setQuantity(Integer quantity) { this.quantity = quantity; }

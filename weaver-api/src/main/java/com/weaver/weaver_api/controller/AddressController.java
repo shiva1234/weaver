@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/addresses")
@@ -18,12 +19,12 @@ public class AddressController {
     private final AddressService addressService;
 
     @GetMapping("/by-customer/{customerId}")
-    public List<Address> listByCustomer(@PathVariable Long customerId) {
+    public List<Address> listByCustomer(@PathVariable UUID customerId) {
         return addressService.listByCustomer(customerId);
     }
 
     @GetMapping("/{id}")
-    public Address get(@PathVariable Long id) {
+    public Address get(@PathVariable UUID id) {
         return addressService.getOne(id);
     }
 
@@ -34,14 +35,14 @@ public class AddressController {
     }
 
     @PutMapping("/{id}")
-    public Address update(@PathVariable Long id, @Valid @RequestBody Address body) {
+    public Address update(@PathVariable UUID id, @Valid @RequestBody Address body) {
         body.setId(id);
         return addressService.update(body);
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(@PathVariable Long id) {
+    public void delete(@PathVariable UUID id) {
         addressService.delete(id);
     }
 }

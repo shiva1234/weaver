@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -22,7 +23,7 @@ public class CategoryService {
     }
 
     @Transactional(Transactional.TxType.SUPPORTS)
-    public Category getOne(Long id) {
+    public Category getOne(UUID id) {
         return categories.findById(id)
                 .orElseThrow(() -> new NotFoundException("Category id " + id + " not found"));
     }
@@ -38,7 +39,7 @@ public class CategoryService {
         return categories.save(c);
     }
 
-    public Category update(Long id, Category body) {
+    public Category update(UUID id, Category body) {
         Category c = categories.findById(id)
                 .orElseThrow(() -> new NotFoundException("Category id " + id + " not found"));
 
@@ -51,7 +52,7 @@ public class CategoryService {
         return categories.save(c);
     }
 
-    public void delete(Long id) {
+    public void delete(UUID id) {
         if (!categories.existsById(id)) {
             throw new NotFoundException("Category id " + id + " not found");
         }

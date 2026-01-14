@@ -16,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -34,11 +35,14 @@ class CartControllerTest {
         customer.setGuest(false);
         Customer createdCustomer = restTemplate.postForObject("/api/customers", customer, Customer.class);
 
-        // 2. Create Product
-        ProductRequest productReq = new ProductRequest(
-                "Cart Product", "Desc", 1L, BigDecimal.TEN, BigDecimal.valueOf(20.00), 100, "CART-SKU-001", true, List.of(), null
+        // 2. Fetch a product from V2 data
+        ResponseEntity<PageResponse<Product>> productsResponse = restTemplate.exchange(
+                "/api/products?size=1",
+                HttpMethod.GET,
+                null,
+                new ParameterizedTypeReference<>() {}
         );
-        Product createdProduct = restTemplate.postForObject("/api/products", productReq, Product.class);
+        Product product = productsResponse.getBody().content().get(0);
 
         // 3. Ensure Cart
         ResponseEntity<Cart> cartResponse = restTemplate.postForEntity(
@@ -47,11 +51,11 @@ class CartControllerTest {
                 Cart.class
         );
         assertThat(cartResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
-        Long cartId = cartResponse.getBody().getId();
+        UUID cartId = cartResponse.getBody().getId();
 
         // 4. Add Item
         ResponseEntity<CartItem> addItemResponse = restTemplate.postForEntity(
-                "/api/carts/" + cartId + "/items?productId=" + createdProduct.getId() + "&quantity=2",
+                "/api/carts/" + cartId + "/items?productId=" + product.getId() + "&quantity=2",
                 null,
                 CartItem.class
         );
@@ -66,7 +70,7 @@ class CartControllerTest {
                 new ParameterizedTypeReference<>() {}
         );
         assertThat(listResponse.getBody()).hasSize(1);
-        assertThat(listResponse.getBody().get(0).getProductName()).isEqualTo("Cart Product");
+        assertThat(listResponse.getBody().get(0).getProductName()).isEqualTo(product.getName());
 
         // 6. Update Quantity
         restTemplate.put("/api/carts/" + cartId + "/items/" + addItemResponse.getBody().getId() + "?quantity=5", null);

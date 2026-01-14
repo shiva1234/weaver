@@ -9,6 +9,7 @@ import org.hibernate.type.SqlTypes;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.UUID;
 
 @Entity
 @Table(name = "product",
@@ -24,8 +25,8 @@ import java.util.List;
 public class Product extends Audited {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
 
     @Setter
     @Column(name="name", nullable = false, length = 200)
@@ -37,7 +38,7 @@ public class Product extends Audited {
 
     @Setter
     @Column(name="category_id", nullable = false)
-    private Long categoryId;
+    private UUID categoryId;
 
     @Column(name="vendor_price", nullable = false, precision = 10, scale = 2)
     private BigDecimal vendorPrice;
@@ -62,10 +63,10 @@ public class Product extends Audited {
     private String primaryImage;
 
     // getters/setters
-    public Long getId() { return id; }
+    public UUID getId() { return id; }
     public String getName() { return name; }
     public String getDescription() { return description; }
-    public Long getCategoryId() { return categoryId; }
+    public UUID getCategoryId() { return categoryId; }
     public BigDecimal getVendorPrice() { return vendorPrice; }
     public BigDecimal getSellPrice() { return sellPrice; }
     public Integer getStockQty() { return stockQty; }

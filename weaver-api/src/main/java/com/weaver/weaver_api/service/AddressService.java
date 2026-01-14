@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -21,7 +22,7 @@ public class AddressService {
     private final CustomerRepository customers;
 
     @Transactional(readOnly = true)
-    public List<Address> listByCustomer(Long customerId) {
+    public List<Address> listByCustomer(UUID customerId) {
         if (!customers.existsById(customerId)) {
             throw new NotFoundException("Customer id " + customerId + " not found");
         }
@@ -29,13 +30,13 @@ public class AddressService {
     }
 
     @Transactional(readOnly = true)
-    public Address getOne(Long id) {
+    public Address getOne(UUID id) {
         return addresses.findById(id)
                 .orElseThrow(() -> new NotFoundException("Address id " + id + " not found"));
     }
 
     public Address create(Address a) {
-        Long cid = a.getCustomer() != null ? a.getCustomer().getId() : null;
+        UUID cid = a.getCustomer() != null ? a.getCustomer().getId() : null;
         if (cid == null) {
             throw new NotFoundException("Address must include customer id");
         }
@@ -48,14 +49,14 @@ public class AddressService {
     }
 
     public Address update(Address a) {
-        Long id = a.getId();
+        UUID id = a.getId();
         if (id == null || !addresses.existsById(id)) {
             throw new NotFoundException("Address id " + id + " not found");
         }
 
         // If client attempts to change customer, validate it
         if (a.getCustomer() != null && a.getCustomer().getId() != null) {
-            Long newCid = a.getCustomer().getId();
+            UUID newCid = a.getCustomer().getId();
             Customer c = customers.findById(newCid)
                     .orElseThrow(() -> new NotFoundException("Customer id " + newCid + " not found"));
             a.setCustomer(c);
@@ -64,7 +65,7 @@ public class AddressService {
         return addresses.save(a);
     }
 
-    public void delete(Long id) {
+    public void delete(UUID id) {
         if (!addresses.existsById(id)) {
             throw new NotFoundException("Address id " + id + " not found");
         }

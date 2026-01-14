@@ -8,10 +8,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import java.math.BigDecimal;
+import java.util.UUID;
 
 @Repository
 public interface ProductRepository extends
-        JpaRepository<Product, Long>,
+        JpaRepository<Product, UUID>,
         JpaSpecificationExecutor<Product> {
     boolean existsBySku(String sku);
     // Simple name search (case-insensitive)
@@ -21,7 +22,7 @@ public interface ProductRepository extends
     Page<Product> findBySellPriceBetween(BigDecimal minPrice, BigDecimal maxPrice, Pageable pageable);
 
     // By category id
-    Page<Product> findByCategoryId(Long categoryId, Pageable pageable);
+    Page<Product> findByCategoryId(UUID categoryId, Pageable pageable);
 
     // Active products only
     Page<Product> findByActiveTrue(Pageable pageable);
