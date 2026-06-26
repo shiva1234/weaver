@@ -49,16 +49,29 @@ public class ProductService {
     }
 
     @Transactional
-    public Product create(ProductRequest r, List<String> imageUrls) {
-        // Optional: enforce unique sku at app layer (DB constraint already exists)
+    public Product create(UUID productId, ProductRequest r, List<String> imageUrls) {
         if (repository.existsBySku(r.sku())) {
             throw new IllegalArgumentException("SKU already exists: " + r.sku());
         }
         Product p = new Product();
+        p.setId(productId);
         apply(p, r);
         p.setImages(imageUrls);
-        if (!imageUrls.isEmpty() && p.getPrimaryImage() == null) {
+        if (!imageUrls.isEmpty()) {
             p.setPrimaryImage(imageUrls.get(0));
+        }
+        return repository.save(p);
+    }
+
+    @Transactional
+    public Product addImages(UUID id, List<String> newImageUrls) {
+        Product p = repository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Product id %s not found".formatted(id)));
+        List<String> existing = p.getImages() != null ? new java.util.ArrayList<>(p.getImages()) : new java.util.ArrayList<>();
+        existing.addAll(newImageUrls);
+        p.setImages(existing);
+        if (p.getPrimaryImage() == null && !existing.isEmpty()) {
+            p.setPrimaryImage(existing.get(0));
         }
         return repository.save(p);
     }

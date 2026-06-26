@@ -4,6 +4,7 @@ import com.weaver.weaver_api.model.Cart;
 import com.weaver.weaver_api.model.CartItem;
 import com.weaver.weaver_api.model.Customer;
 import com.weaver.weaver_api.model.Product;
+import com.weaver.weaver_api.web.PageResponse;
 import com.weaver.weaver_api.web.ProductRequest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,7 +41,7 @@ class CartControllerTest {
                 "/api/products?size=1",
                 HttpMethod.GET,
                 null,
-                new ParameterizedTypeReference<>() {}
+                new ParameterizedTypeReference<PageResponse<Product>>() {}
         );
         Product product = productsResponse.getBody().content().get(0);
 

@@ -63,14 +63,13 @@ public class ProductController {
             @RequestPart("product") @Valid ProductRequest body,
             @RequestPart(value = "files", required = false) List<MultipartFile> files
     ) throws IOException {
+        // Generate product ID upfront so images go under products/{id}/
+        UUID productId = UUID.randomUUID();
         List<String> imageUrls = new ArrayList<>();
         if (files != null && !files.isEmpty()) {
-            for (MultipartFile file : files) {
-                String url = storageService.uploadFile(file, body.categoryId(), body.sku());
-                imageUrls.add(url);
-            }
+            imageUrls = storageService.uploadProductImages(productId, files);
         }
-        return service.create(body, imageUrls);
+        return service.create(productId, body, imageUrls);
     }
 
     @PutMapping("/{id}")
@@ -78,9 +77,21 @@ public class ProductController {
         return service.update(id, body);
     }
 
+    @PostMapping("/{id}/images")
+    public Product uploadImages(
+            @PathVariable UUID id,
+            @RequestPart("files") List<MultipartFile> files
+    ) throws IOException {
+        Product product = service.get(id);
+        int startIndex = product.getImages() != null ? product.getImages().size() : 0;
+        List<String> newUrls = storageService.uploadProductImages(id, files, startIndex);
+        return service.addImages(id, newUrls);
+    }
+
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable UUID id) {
+        storageService.deleteProductImages(id);
         service.delete(id);
     }
 }

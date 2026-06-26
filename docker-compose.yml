@@ -1,3 +1,5 @@
+#version: "3.9"
+
 services:
   weaver-db:
     image: postgres:17-alpine
@@ -7,6 +9,10 @@ services:
       - POSTGRES_DB=appdb
     ports:
       - "15432:5432"
+    volumes:
+      - weaver_db_data_v2:/var/lib/postgresql/data
+#    networks:
+#      - weaver_network
 
   minio:
     image: minio/minio
@@ -20,3 +26,12 @@ services:
       - "9001:9001"
       - "9000:9000"
     command: [ "server", "/data", "--console-address", ":9001" ]
+#    networks:
+#      - weaver_network
+
+volumes:
+  weaver_db_data_v2:
+
+#networks:
+#  weaver_network:
+#    driver: bridge

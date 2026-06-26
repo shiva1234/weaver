@@ -45,13 +45,39 @@
 									"description": "Sort direction (asc/desc)"
 								},
 								{
-									"key": "minPrice",
-									"value": "100",
+									"key": "query",
+									"value": "saree",
+									"description": "Search by product name",
 									"disabled": true
 								},
 								{
-									"key": "query",
-									"value": "saree",
+									"key": "minPrice",
+									"value": "100",
+									"description": "Minimum sell price",
+									"disabled": true
+								},
+								{
+									"key": "maxPrice",
+									"value": "50000",
+									"description": "Maximum sell price",
+									"disabled": true
+								},
+								{
+									"key": "categoryId",
+									"value": "11111111-1111-1111-1111-111111111111",
+									"description": "Filter by category UUID",
+									"disabled": true
+								},
+								{
+									"key": "active",
+									"value": "true",
+									"description": "Filter by active status",
+									"disabled": true
+								},
+								{
+									"key": "sku",
+									"value": "SAR-BAN-001",
+									"description": "Filter by exact SKU",
 									"disabled": true
 								}
 							]
@@ -156,6 +182,38 @@
 								"{{productId}}"
 							]
 						}
+					},
+					"response": []
+				},
+				{
+					"name": "Upload Images to Product",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "files",
+									"type": "file",
+									"src": [],
+									"description": "Image files to upload"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/products/{{productId}}/images",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"products",
+								"{{productId}}",
+								"images"
+							]
+						},
+						"description": "Upload additional images to an existing product. Images are stored under products/{productId}/ in S3."
 					},
 					"response": []
 				}
@@ -503,6 +561,55 @@
 					"response": []
 				},
 				{
+					"name": "Attach Guest Cart to Customer",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/carts/attach-guest?guestToken={{guestToken}}&customerId={{customerId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"carts",
+								"attach-guest"
+							],
+							"query": [
+								{
+									"key": "guestToken",
+									"value": "{{guestToken}}"
+								},
+								{
+									"key": "customerId",
+									"value": "{{customerId}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Cart by Guest Token",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/carts/guest/{{guestToken}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"carts",
+								"guest",
+								"{{guestToken}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "Get Cart by Customer",
 					"request": {
 						"method": "GET",
@@ -517,6 +624,26 @@
 								"carts",
 								"by-customer",
 								"{{customerId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List Cart Items",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/carts/{{cartId}}/items",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"carts",
+								"{{cartId}}",
+								"items"
 							]
 						}
 					},
@@ -553,9 +680,57 @@
 					"response": []
 				},
 				{
-					"name": "List Cart Items",
+					"name": "Update Cart Item Quantity",
 					"request": {
-						"method": "GET",
+						"method": "PUT",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/carts/{{cartId}}/items/{{cartItemId}}?quantity=2",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"carts",
+								"{{cartId}}",
+								"items",
+								"{{cartItemId}}"
+							],
+							"query": [
+								{
+									"key": "quantity",
+									"value": "2"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Remove Cart Item",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/carts/{{cartId}}/items/{{cartItemId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"carts",
+								"{{cartId}}",
+								"items",
+								"{{cartItemId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Clear Cart",
+					"request": {
+						"method": "DELETE",
 						"header": [],
 						"url": {
 							"raw": "{{baseUrl}}/api/carts/{{cartId}}/items",
@@ -567,6 +742,136 @@
 								"carts",
 								"{{cartId}}",
 								"items"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Addresses",
+			"item": [
+				{
+					"name": "List Addresses by Customer",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/addresses/by-customer/{{customerId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"addresses",
+								"by-customer",
+								"{{customerId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get One Address",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/addresses/{{addressId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"addresses",
+								"{{addressId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Address",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"pm.collectionVariables.set(\"addressId\", jsonData.id);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"customer\": { \"id\": \"{{customerId}}\" },\n  \"addressLine1\": \"123 Silk Lane\",\n  \"addressLine2\": \"Apt 4B\",\n  \"city\": \"Varanasi\",\n  \"state\": \"Uttar Pradesh\",\n  \"postalCode\": \"221001\",\n  \"country\": \"IN\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/addresses",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"addresses"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Address",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"customer\": { \"id\": \"{{customerId}}\" },\n  \"addressLine1\": \"456 Weaver Road\",\n  \"city\": \"Kanchipuram\",\n  \"state\": \"Tamil Nadu\",\n  \"postalCode\": \"631501\",\n  \"country\": \"IN\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/addresses/{{addressId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"addresses",
+								"{{addressId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Address",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/addresses/{{addressId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"addresses",
+								"{{addressId}}"
 							]
 						}
 					},
@@ -618,6 +923,21 @@
 		},
 		{
 			"key": "cartId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "cartItemId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "guestToken",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "addressId",
 			"value": "",
 			"type": "string"
 		}

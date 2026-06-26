@@ -1,4 +1,4 @@
-version: '3.8'
+#version: '3.9'
 services:
   weaver-api:
     build:
@@ -15,6 +15,8 @@ services:
     restart: always
     depends_on:
       - weaver-db
+#    networks:
+#      - weaver_network
 
 #  weaver-web:
 #    container_name: weaver-web
@@ -26,3 +28,5 @@ services:
 #    environment:
 #      SERVER_SIDE_API_BASE_URL: http://localhost:18080
 #      CLIENT_SIDE_API_BASE_URL: http://localhost:18080
+#    networks:
+#      - weaver_network

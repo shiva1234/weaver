@@ -28,6 +28,8 @@ public class Product extends Audited {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
+    public void setId(UUID id) { this.id = id; }
+
     @Setter
     @Column(name="name", nullable = false, length = 200)
     private String name;
@@ -56,11 +58,31 @@ public class Product extends Audited {
     private Boolean active = Boolean.TRUE;
 
     @JdbcTypeCode(SqlTypes.JSON)
-    @Column(name="images", nullable = false)
+    @Column(name="images", nullable = false, columnDefinition = "varchar(4000)")
     private List<String> images; // e.g. ["s3://bucket/products/product_id=1/uuid.jpg", ...]
 
     @Column(name="primary_image", length = 1024)
     private String primaryImage;
+
+    @Column(name="material", length = 100)
+    private String material;
+
+    @Column(name="care_instructions", columnDefinition = "text")
+    private String careInstructions;
+
+    @Column(name="rating_avg", precision = 3, scale = 2)
+    private BigDecimal ratingAvg = BigDecimal.ZERO;
+
+    @Column(name="rating_count")
+    private Integer ratingCount = 0;
+
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name="tags", columnDefinition = "varchar(2000)")
+    private List<String> tags;
+
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name="specifications", columnDefinition = "varchar(4000)")
+    private java.util.Map<String, String> specifications;
 
     // getters/setters
     public UUID getId() { return id; }
@@ -74,6 +96,12 @@ public class Product extends Audited {
     public Boolean getActive() { return active; }
     public List<String> getImages() { return images; }
     public String getPrimaryImage() { return primaryImage; }
+    public String getMaterial() { return material; }
+    public String getCareInstructions() { return careInstructions; }
+    public BigDecimal getRatingAvg() { return ratingAvg; }
+    public Integer getRatingCount() { return ratingCount; }
+    public List<String> getTags() { return tags; }
+    public java.util.Map<String, String> getSpecifications() { return specifications; }
 
     public void setVendorPrice(BigDecimal vendorPrice) { this.vendorPrice = vendorPrice; }
     public void setSellPrice(BigDecimal sellPrice) { this.sellPrice = sellPrice; }
@@ -82,4 +110,10 @@ public class Product extends Audited {
     public void setActive(Boolean active) { this.active = active; }
     public void setImages(List<String> images) { this.images = images; }
     public void setPrimaryImage(String primaryImage) { this.primaryImage = primaryImage; }
+    public void setMaterial(String material) { this.material = material; }
+    public void setCareInstructions(String careInstructions) { this.careInstructions = careInstructions; }
+    public void setRatingAvg(BigDecimal ratingAvg) { this.ratingAvg = ratingAvg; }
+    public void setRatingCount(Integer ratingCount) { this.ratingCount = ratingCount; }
+    public void setTags(List<String> tags) { this.tags = tags; }
+    public void setSpecifications(java.util.Map<String, String> specifications) { this.specifications = specifications; }
 }
