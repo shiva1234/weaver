@@ -27,6 +27,11 @@ public class CustomerController {
         return customerService.create(body);
     }
 
+    @PostMapping("/login")
+    public Customer login(@RequestBody Map<String, String> body) {
+        return customerService.login(body.get("email"), body.get("password"));
+    }
+
     @PutMapping("/{id}")
     public Customer update(@PathVariable UUID id, @Valid @RequestBody Customer body) {
         return customerService.update(id, body);

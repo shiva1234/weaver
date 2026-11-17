@@ -6,136 +6,169 @@ export const revalidate = 0;
 
 async function getFeaturedProducts(): Promise<Product[]> {
   try {
-    const res = await getProducts({ page: 1, size: 8, sort: "sellPrice", dir: "desc" });
+    const res = await getProducts({ page: 1, size: 6, sort: "sellPrice", dir: "desc" });
     return res.content;
   } catch {
     return [];
   }
 }
 
+const brandNotes = [
+  {
+    title: "Made by hand",
+    detail: "The craft",
+    quote: "Each piece begins with the patience of a master weaver and the steady rhythm of a handloom.",
+  },
+  {
+    title: "Rooted in place",
+    detail: "The heritage",
+    quote: "Every weave carries a sense of place, shaped by techniques and colors passed through generations.",
+  },
+  {
+    title: "Made to be kept",
+    detail: "The intention",
+    quote: "Choose pieces with intention, wear them often, and let them become part of your own story.",
+  },
+];
+
+const collectionHighlights = [
+  { title: "Silk, with a story", detail: "The heirloom edit", image: "photo-1617627143750-d86bc21e42bb" },
+  { title: "Softly, every day", detail: "Handloom cottons", image: "photo-1539109136881-3be0616acf4b" },
+  { title: "A little celebration", detail: "Festive favorites", image: "photo-1515886657613-9f3515b0c78f" },
+  { title: "Color in motion", detail: "New season hues", image: "photo-1529139574466-a303027c1d8b" },
+  { title: "Made to be kept", detail: "Artisan-crafted", image: "photo-1524504388940-b1c1722653e1" },
+  { title: "Tradition, reimagined", detail: "Modern heirlooms", image: "photo-1483985988355-763728e1935b" },
+];
+
 export default async function Home() {
   const featured = await getFeaturedProducts();
 
   return (
     <>
-      {/* Hero Section */}
-      <section className="relative bg-[#2D2926] overflow-hidden">
-        <div className="absolute inset-0 opacity-20">
-          <div className="absolute inset-0 bg-gradient-to-r from-[#2D2926] via-transparent to-[#2D2926]" />
-        </div>
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 lg:py-36">
-          <div className="max-w-2xl">
-            <p className="text-[var(--color-gold)] text-sm font-medium tracking-[0.3em] uppercase mb-4">
-              Handcrafted with Heritage
+      <section
+        className="home-hero relative isolate flex min-h-[520px] items-center overflow-hidden bg-[#e8e4df] sm:min-h-[590px] lg:min-h-[650px]"
+      >
+        <div className="mx-auto w-full max-w-7xl px-6 py-20 sm:px-10 lg:px-12">
+          <div className="max-w-xl">
+            <p className="mb-4 text-[10px] font-semibold uppercase tracking-[0.34em] text-[var(--color-brand)] sm:text-xs">
+              The summer collection · 2026
             </p>
             <h1
-              className="text-4xl lg:text-6xl font-semibold text-white leading-[1.1] mb-6"
+              className="max-w-lg text-5xl font-medium leading-[1.04] tracking-[-0.045em] text-[#292521] sm:text-6xl lg:text-[76px]"
               style={{ fontFamily: "var(--font-playfair), serif" }}
             >
-              Timeless Textiles,<br />Modern Elegance
+              Wear a little wonder.
             </h1>
-            <p className="text-lg text-gray-300 leading-relaxed mb-10 max-w-lg">
-              Discover authentic handloom sarees and textiles crafted by master artisans from across India.
+            <p className="mt-6 max-w-md text-sm leading-7 text-[#5c5650] sm:text-base">
+              Discover handwoven pieces made slowly, worn for years, and passed down with love.
             </p>
-            <div className="flex flex-wrap gap-4">
-              <Link href="/sarees" className="btn-primary inline-block">
-                Explore Collection
-              </Link>
-              <Link href="/sarees" className="btn-outline inline-block text-white border-white/30 hover:border-white hover:text-white">
-                New Arrivals
-              </Link>
-            </div>
+            <Link
+              href="/sarees"
+              className="mt-8 inline-flex items-center gap-5 bg-[#292521] px-6 py-4 text-[10px] font-semibold uppercase tracking-[0.2em] text-white transition-colors hover:bg-[var(--color-brand)]"
+            >
+              Shop the collection
+              <span aria-hidden="true" className="text-base leading-none">↗</span>
+            </Link>
           </div>
         </div>
-      </section>
-
-      {/* Categories */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-        <div className="text-center mb-12">
-          <h2 className="section-heading">Shop by Category</h2>
-          <p className="section-subheading">Curated collections for every occasion</p>
-        </div>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 lg:gap-6">
-          {[
-            { name: "Sarees", desc: "Traditional & contemporary", color: "#7B2D26" },
-            { name: "Lehengas", desc: "Bridal & festive", color: "#B8956A" },
-            { name: "Fabrics", desc: "By the meter", color: "#4A6741" },
-            { name: "Dupattas", desc: "Handwoven accents", color: "#3D5A80" },
-          ].map((cat) => (
-            <Link
-              key={cat.name}
-              href="/sarees"
-              className="group relative rounded-xl overflow-hidden aspect-[3/4] flex items-end"
-            >
-              <div className="absolute inset-0" style={{ backgroundColor: cat.color }} />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300" />
-              <div className="relative p-5 lg:p-6 w-full">
-                <h3
-                  className="text-lg lg:text-xl font-semibold text-white mb-0.5"
-                  style={{ fontFamily: "var(--font-playfair), serif" }}
-                >
-                  {cat.name}
-                </h3>
-                <p className="text-xs text-white/70">{cat.desc}</p>
-              </div>
-            </Link>
-          ))}
+        <div className="absolute bottom-7 right-8 hidden items-center gap-3 text-[9px] font-medium uppercase tracking-[0.22em] text-[#514a44] sm:flex lg:right-12">
+          <span className="h-px w-9 bg-[#514a44]/60" />
+          Woven by hand in India
         </div>
       </section>
 
-      {/* Featured Products */}
-      {featured.length > 0 && (
-        <section className="bg-white py-20">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-end justify-between mb-10">
-              <div>
-                <h2 className="section-heading">Featured Collection</h2>
-                <p className="section-subheading">Our most popular picks</p>
-              </div>
-              <Link href="/sarees" className="text-sm font-medium text-[var(--color-brand)] hover:underline underline-offset-4">
-                View all →
-              </Link>
+      <section className="bg-white px-5 py-16 sm:px-8 sm:py-20 lg:px-12 lg:py-24">
+        <div className="mx-auto max-w-7xl">
+          <div className="mb-9 flex items-end justify-between gap-5 sm:mb-12">
+            <div>
+              <p className="mb-2 text-[9px] font-semibold uppercase tracking-[0.28em] text-[var(--color-gold)]">
+                Made to be treasured
+              </p>
+              <h2 className="section-heading text-[26px] sm:text-3xl">The best products</h2>
             </div>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
-              {featured.map((p) => (
-                <ProductCard key={p.id} p={p} />
+            <Link
+              href="/sarees"
+              className="mb-1 shrink-0 border-b border-[#a58b6a] pb-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-[#514a44] transition-colors hover:text-[var(--color-brand)]"
+            >
+              View all
+            </Link>
+          </div>
+
+          {featured.length > 0 ? (
+            <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-2 sm:gap-x-6 sm:gap-y-10 lg:grid-cols-3 lg:gap-x-8">
+              {featured.map((product) => (
+                <ProductCard key={product.id} p={product} />
               ))}
             </div>
-          </div>
-        </section>
-      )}
-
-      {/* Value Props */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-        <div className="grid md:grid-cols-3 gap-8">
-          {[
-            {
-              title: "Artisan Crafted",
-              desc: "Every piece is handwoven by skilled artisans preserving centuries-old techniques.",
-              icon: "M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z"
-            },
-            {
-              title: "Authenticity Certified",
-              desc: "GI-tagged products with verified origin ensuring genuine handloom quality.",
-              icon: "M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"
-            },
-            {
-              title: "Sustainable Fashion",
-              desc: "Supporting traditional weaving communities and eco-friendly production methods.",
-              icon: "M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z"
-            },
-          ].map((item) => (
-            <div key={item.title} className="text-center p-8 rounded-xl border border-[var(--color-border)] bg-white">
-              <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-[var(--color-warm-gray)] mb-5">
-                <svg className="w-6 h-6 text-[var(--color-brand)]" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d={item.icon} />
-                </svg>
-              </div>
-              <h3 className="text-base font-semibold text-[var(--color-text)] mb-2">{item.title}</h3>
-              <p className="text-sm text-[var(--color-text-muted)] leading-relaxed">{item.desc}</p>
+          ) : (
+            <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:gap-x-6 sm:gap-y-10 lg:grid-cols-3 lg:gap-x-8">
+              {collectionHighlights.map((item) => (
+                <Link
+                  key={item.title}
+                  href="/sarees"
+                  aria-label={`${item.title}, explore sarees`}
+                  className="group relative flex aspect-[4/5] items-end overflow-hidden bg-[#e8e4df]"
+                  style={{
+                    backgroundImage: `linear-gradient(0deg, rgba(27,24,21,.58), transparent 48%), url('https://images.unsplash.com/${item.image}?auto=format&fit=crop&w=900&q=80')`,
+                    backgroundPosition: "center",
+                    backgroundSize: "cover",
+                  }}
+                >
+                  <div className="p-4 text-white sm:p-6">
+                    <p className="text-[9px] font-medium uppercase tracking-[0.2em] text-white/75">{item.detail}</p>
+                    <h3
+                      className="mt-1 text-lg sm:text-xl"
+                      style={{ fontFamily: "var(--font-playfair), serif" }}
+                    >
+                      {item.title}
+                    </h3>
+                    <span className="mt-3 inline-block border-b border-white/60 pb-1 text-[9px] font-semibold uppercase tracking-[0.16em] opacity-0 transition-opacity group-hover:opacity-100">
+                      Explore
+                    </span>
+                  </div>
+                </Link>
+              ))}
             </div>
-          ))}
+          )}
+        </div>
+      </section>
+
+      <section className="bg-[#f5f3f0] px-5 py-16 sm:px-8 sm:py-20 lg:px-12 lg:py-24">
+        <div className="mx-auto max-w-7xl">
+          <div className="mx-auto mb-10 max-w-xl text-center sm:mb-12">
+            <p className="mb-2 text-[9px] font-semibold uppercase tracking-[0.28em] text-[var(--color-gold)]">
+              Thoughtful from thread to finish
+            </p>
+            <h2 className="section-heading text-[26px] sm:text-3xl">Beautifully made, with purpose</h2>
+            <p className="mt-3 text-sm text-[var(--color-text-muted)]">
+              A little more meaning in every detail.
+            </p>
+          </div>
+          <div className="grid gap-4 md:grid-cols-3 md:gap-5">
+            {brandNotes.map((note) => (
+              <article
+                key={note.detail}
+                className="flex min-h-[220px] flex-col border border-[#e7e2dc] bg-white p-6 sm:p-7"
+              >
+                <p className="mb-5 text-[9px] font-semibold uppercase tracking-[0.2em] text-[var(--color-gold)]">{note.detail}</p>
+                <h3 className="mb-3 text-lg text-[#292521]" style={{ fontFamily: "var(--font-playfair), serif" }}>
+                  {note.title}
+                </h3>
+                <p className="flex-1 text-[13px] leading-6 text-[#514a44]">{note.quote}</p>
+                <div className="mt-6 flex items-center gap-3 border-t border-[#eeeae5] pt-4">
+                  <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[#f1efeb] text-xs font-medium text-[var(--color-brand)]">
+                    W
+                  </span>
+                  <div>
+                    <p className="text-[11px] font-semibold text-[#292521]">Weaver</p>
+                    <p className="mt-0.5 text-[10px] uppercase tracking-[0.12em] text-[#8b837b]">
+                      Our promise
+                    </p>
+                  </div>
+                </div>
+              </article>
+            ))}
+          </div>
         </div>
       </section>
     </>

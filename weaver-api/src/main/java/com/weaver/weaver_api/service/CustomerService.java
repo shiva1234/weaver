@@ -28,7 +28,17 @@ public class CustomerService {
         if (c.getPassword() != null && !c.getPassword().isBlank()) {
             c.setPassword(passwordEncoder.encode(c.getPassword()));
         }
+        c.setGuest(false);
         return customers.save(c);
+    }
+
+    public Customer login(String email, String password) {
+        Customer customer = customers.findByEmailIgnoreCase(email)
+                .orElseThrow(() -> new NotFoundException("Invalid email or password"));
+        if (!passwordEncoder.matches(password, customer.getPassword())) {
+            throw new IllegalArgumentException("Invalid email or password");
+        }
+        return customer;
     }
 
     public Customer getOrCreateGuestByEmail(String email) {

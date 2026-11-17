@@ -1,6 +1,8 @@
 // Customer.java
 package com.weaver.weaver_api.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -22,6 +24,7 @@ public class Customer extends Audited {
     @Column(name = "is_guest", nullable = false)
     private boolean guest = true;
 
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @Column(name="password", nullable = false, length = 255)
     private String password; // store a bcrypt/argon2 hash
 
@@ -34,9 +37,11 @@ public class Customer extends Audited {
     @Column(name="phone", length = 40)
     private String phone;
 
+    @JsonIgnore
     @Column(name="reset_token", length = 255)
     private String resetToken;
 
+    @JsonIgnore
     @Column(name="reset_token_expiry")
     private LocalDateTime resetTokenExpiry;
 

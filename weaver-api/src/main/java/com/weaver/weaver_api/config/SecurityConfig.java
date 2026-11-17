@@ -35,7 +35,7 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         var config = new CorsConfiguration();
         // Your Next.js dev origin:
-        config.setAllowedOrigins(List.of("http://localhost:3000"));
+        config.setAllowedOrigins(List.of("http://localhost:3000", "http://localhost:3001", "http://localhost:3002"));
         // If you deploy the Next.js site, add that origin too.
         // config.setAllowedOrigins(List.of("https://your-frontend.com", "http://localhost:3000"));
 

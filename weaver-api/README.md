@@ -1,3 +1,17 @@
+# Start infra (Postgres + MinIO)
+docker compose up -d
+
+# Run the API
+cd weaver-api
+./mvnw spring-boot:run -Dspring-boot.run.profiles=local
+
+
+# Start the UI
+cd weaver-web
+npm install && npm run dev
+
+
+
 # weaver_api
 create docker image build
 ./mvnw spring-boot:build-image -Dspring-boot.build-image.imageName=run/weaver-api

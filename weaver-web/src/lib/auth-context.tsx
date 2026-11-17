@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:18080";
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8080";
 
 export type Customer = {
   id: string;
@@ -13,10 +13,24 @@ export type Customer = {
   guest: boolean;
 };
 
+export type RegisterData = {
+  firstName: string;
+  lastName: string;
+  phone: string;
+  email: string;
+  password: string;
+  addressLine1?: string;
+  addressLine2?: string;
+  city?: string;
+  state?: string;
+  postalCode?: string;
+  country?: string;
+};
+
 type AuthContextType = {
   customer: Customer | null;
   loading: boolean;
-  register: (email: string, password: string) => Promise<void>;
+  register: (data: RegisterData) => Promise<void>;
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
 };
@@ -35,55 +49,69 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setLoading(false);
   }, []);
 
-  const register = async (email: string, password: string) => {
+  const saveCustomer = (c: Customer) => {
+    setCustomer(c);
+    localStorage.setItem("weaver_customer", JSON.stringify(c));
+  };
+
+  const register = async (data: RegisterData) => {
     const res = await fetch(`${API_BASE}/api/customers`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        firstName: data.firstName,
+        lastName: data.lastName,
+        phone: data.phone,
+        email: data.email,
+        password: data.password,
+        guest: false,
+      }),
+    });
+    if (!res.ok) {
+      const text = await res.text();
+      if (text.includes("uk_customer_email") || text.includes("duplicate") || text.includes("constraint")) {
+        throw new Error("An account with this email already exists");
+      }
+      throw new Error(text || `Registration failed (${res.status})`);
+    }
+    const cust: Customer = await res.json();
+
+    if (data.addressLine1 && data.city && data.state && data.postalCode && data.country) {
+      await fetch(`${API_BASE}/api/addresses`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          customer: { id: cust.id },
+          addressLine1: data.addressLine1,
+          addressLine2: data.addressLine2 || "",
+          city: data.city,
+          state: data.state,
+          postalCode: data.postalCode,
+          country: data.country,
+        }),
+      });
+    }
+
+    saveCustomer(cust);
+  };
+
+  const login = async (email: string, password: string) => {
+    const res = await fetch(`${API_BASE}/api/customers/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password }),
     });
     if (!res.ok) {
-      const text = await res.text();
-      throw new Error(text || `Registration failed (${res.status})`);
-    }
-    const data: Customer = await res.json();
-    setCustomer(data);
-    localStorage.setItem("weaver_customer", JSON.stringify(data));
-  };
-
-  const login = async (email: string, _password: string) => {
-    // Since there's no login endpoint, we use the ensure-guest endpoint with email
-    // to find the customer, then verify password client-side isn't possible.
-    // We'll do a simple flow: fetch customer by creating with same email (API should return existing or error)
-    // Actually, let's use forgot-password to verify email exists, then just store.
-    // Simplest approach: POST /customers with same email — if 409/conflict, GET won't work without ID.
-    // Best approach for now: create a login that calls a custom endpoint or just re-registers.
-    // Since the API has no login endpoint, we'll simulate by registering (if new) or checking via cart ensure.
-    
-    // Try to create — if the email already exists, the API will return an error.
-    // Then we know the user exists and we "log them in" by fetching via cart ensure.
-    const res = await fetch(`${API_BASE}/api/carts/ensure-guest?email=${encodeURIComponent(email)}`, {
-      method: "POST",
-    });
-    if (!res.ok) {
       throw new Error("Invalid email or password");
     }
-    const cart = await res.json();
-    // Get customer ID from cart's customerId
-    if (cart.customerId) {
-      const custRes = await fetch(`${API_BASE}/api/customers/${cart.customerId}`);
-      if (custRes.ok) {
-        const data: Customer = await custRes.json();
-        setCustomer(data);
-        localStorage.setItem("weaver_customer", JSON.stringify(data));
-        return;
-      }
-    }
-    throw new Error("Invalid email or password");
+    const data: Customer = await res.json();
+    saveCustomer(data);
   };
 
   const logout = () => {
     setCustomer(null);
     localStorage.removeItem("weaver_customer");
+    localStorage.removeItem("weaver_guest_token");
   };
 
   return (
